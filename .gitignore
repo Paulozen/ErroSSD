@@ -1,0 +1,16 @@
+# Ambientes e caches
+.venv/
+__pycache__/
+*.pyc
+.claude/
+
+# Fora do deliverable
+projeto_colab/
+arquivo_morto/
+logs_execucao/
+
+# Dados e binarios pesados (nao versionar; ver README para regenerar)
+# data.pickle (352 MB) estoura o limite de 100 MB do GitHub
+*.pickle
+*.pkl
+*.pth
