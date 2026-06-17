@@ -150,10 +150,12 @@ Leitura (amarrar na mensagem central):
 - **Interpretação:** que o **desvio-padrão** (variabilidade recente) de um
   atributo seja a feature nº1 faz sentido — degradação aparece como **mudança/
   instabilidade** dos valores, não só pelo valor absoluto.
-- **A confirmar (pesquisa de vocês):** ver a que atributo SMART real corresponde
-  `smart_05`. Se a numeração seguir o **ID SMART**, `smart_05` = *Reallocated
-  Sectors Count*, um preditor clássico de falha — o que casaria perfeitamente.
-  Confirmem antes de afirmar (ver *Dicionário de features*).
+- **Importante (a levantar):** `smart_05` é o atributo na **6ª posição** do
+  dataset (índice 5, contando do 0) — **não é o "SMART ID 5"**. Os nomes
+  `smart_00…smart_23` refletem apenas a **ordem das colunas** no dataset, não o
+  número oficial do atributo SMART. A equipe **ainda está levantando** a que
+  atributo real cada coluna corresponde — **não afirmem o significado sem
+  confirmar** (ver *Dicionário de features*).
 
 ## 10. Análise operacional por disco (visão prática)
 
@@ -201,10 +203,12 @@ desgaste, temperatura, etc.). Cada atributo SMART tem um **ID** e um valor por
 dia. O dataset traz **24 atributos** por disco por dia, nomeados `smart_00` …
 `smart_23`.
 
-> **Atenção (confirmar):** verifiquem se `smart_XX` se refere ao **ID SMART** ou
-> apenas à **posição da coluna**. Isso decide o nome real de cada feature. A
-> tabela abaixo lista os atributos SMART **mais associados a falha** em SSDs,
-> para vocês mapearem/confirmarem.
+> **Atenção — os nomes NÃO são os IDs SMART:** `smart_XX` indica apenas a
+> **posição/ordem da coluna no dataset** (`smart_05` = 6ª coluna, índice 5), e
+> **não** o número oficial do atributo SMART. **O significado de cada coluna
+> ainda está sendo levantado pela equipe** — confirmem antes de nomear qualquer
+> feature na apresentação. A tabela abaixo é só uma **referência** dos atributos
+> SMART mais associados a falha em SSDs, para ajudar nesse mapeamento.
 
 | ID SMART | Nome | O que indica (relação com falha) |
 |---|---|---|
@@ -224,8 +228,9 @@ dia. O dataset traz **24 atributos** por disco por dia, nomeados `smart_00` …
 | 202 / 231 / 233 | Media Wearout / SSD Life Left | vida útil restante da NAND |
 | 241 / 242 | Total LBAs Written / Read | volume total escrito/lido |
 
-(Lista de referência — não significa que os 24 do dataset são exatamente esses;
-confirmem o mapeamento.)
+(Lista de **referência**, não o mapeamento do dataset: os 24 atributos
+`smart_00…smart_23` ainda precisam ser mapeados para os atributos reais — tarefa
+em aberto, pois os nomes são só a ordem das colunas.)
 
 ## O que significam os sufixos (agregações da janela)
 Cada atributo SMART vira **5 features**, resumindo os últimos `WINDOW = 90` dias
@@ -238,9 +243,10 @@ daquele disco até o dia atual:
 - **`_min`** — **menor** valor na janela.
 - **`_max`** — **maior** valor na janela (picos recentes).
 
-Exemplo de leitura: `smart_05_std` alto = o "Reallocated Sectors Count"
-(provável) **andou mudando** nas últimas semanas → indício de problema. Daí ele
-ser a feature mais importante para o RF.
+Exemplo de leitura: `smart_05_std` alto = o atributo da **6ª coluna** (qual seja
+— a confirmar) **andou variando** nas últimas semanas → indício de degradação.
+Por isso ele é a feature mais importante para o RF, mesmo sem sabermos ainda o
+nome oficial dele.
 
 ---
 

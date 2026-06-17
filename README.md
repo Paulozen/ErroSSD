@@ -100,3 +100,30 @@ python executar_tudo.py
 ```
 
 Detalhes, dependências e solução de problemas em `COMO_EXECUTAR.md`.
+
+## Sobre o repositório no GitHub (o que está e o que não está)
+
+Por limite de tamanho do GitHub (100 MB por arquivo) e por serem **regeneráveis**,
+ficaram **fora do versionamento** (ver `.gitignore`):
+
+- **Dados:** `comum/data.pickle` (~352 MB) e `comum/mask.pickle`.
+- **Modelos e resultados:** todos os `*.pkl` (`resultados_*`, `modelo_*`,
+  `*_learning_curve`) e os checkpoints `*.pth` do LSTM.
+- **Atributo SMART (nota):** no dataset os atributos são nomeados
+  `smart_00…smart_23` apenas pela **ordem das colunas** — **não** são os IDs
+  SMART oficiais; o significado real de cada um ainda está sendo levantado.
+- **Pastas auxiliares:** `projeto_colab/`, `arquivo_morto/`, `.venv/`,
+  `logs_execucao/`.
+
+O que **está** no repositório: o código (`ssd_utils.py`, `executar_tudo.py`),
+**todos os notebooks com as saídas/figuras embutidas** (os resultados aparecem
+direto no GitHub) e as figuras `.png`.
+
+**Para re-executar a partir de um clone:**
+1. Coloque `data.pickle` e `mask.pickle` em `comum/` (compartilhados à parte,
+   ex.: Google Drive — não vão no git por serem grandes demais).
+2. Para rodar as comparações sem retreinar tudo, coloque os checkpoints
+   `lstm_7_dias.pth` / `lstm_30_dias.pth` em `horizonte_7dias/` /
+   `horizonte_30dias/`.
+3. Siga a *Ordem de execução* acima. (Os `*.pkl`/`*.png` são recriados ao rodar
+   os notebooks.)
