@@ -1,4 +1,4 @@
-# Guia de Apresentação — Predição de Falhas em SSDs
+# Guia de Apresentação — Predição de Falhas em HDDs
 
 Roteiro de tópicos para a apresentação (30 min, 4 integrantes). Ordenado do
 contexto até a discussão final, com os pontos a destacar e os **números reais**
@@ -23,9 +23,11 @@ Tudo na apresentação deve voltar a essa frase.
 
 ## 1. Contexto do problema
 
-- **Objetivo:** prever, para cada disco SSD e cada dia, se ele vai **falhar nos
+- **Objetivo:** prever, para cada disco (HDD) e cada dia, se ele vai **falhar nos
   próximos N dias** (manutenção preditiva). Antecipar a falha permite trocar/
   fazer backup antes da perda de dados.
+- **Os discos são HDDs** — modelo **Seagate ST4000DM000** (4 TB). Por isso os
+  atributos SMART incluem indicadores mecânicos (motor, cabeças, pratos).
 - **Por que é difícil:** falha é evento **raro** (forte desbalanceamento), e o
   sinal de degradação é sutil e se desenrola ao longo do tempo.
 - **Por que importa (contexto da disciplina):** é um problema real de
@@ -149,13 +151,13 @@ Leitura (amarrar na mensagem central):
   | Coluna | Atributo (ID SMART) | Importância |
   |---|---|---|
   | `smart_05` | **Power-On Hours** (9) — uso/idade | 1ª (todas as 5 agregações no topo; `smart_05_std` ≈ 0,046) |
-  | `smart_19` | **Offline Uncorrectable** (198) — setores irrecuperáveis | preditor clássico de falha |
+  | `smart_19` | **Offline Uncorrectable** (198) — setores não corrigíveis | alto |
   | `smart_23` | **Total LBAs Read** (242) — volume de leitura | alto |
   | `smart_22` | **Total LBAs Written** (241) — volume de escrita | alto |
   | `smart_00` | **Raw Read Error Rate** (1) — taxa de erro de leitura | alto |
 - **Interpretação:** o modelo combina **desgaste/uso** (Power-On Hours e volume
-  de leitura/escrita — quanto mais uso, mais perto do fim de vida) com um
-  **indicador clássico de degradação** (Offline Uncorrectable). O `_std` (variação
+  de leitura/escrita — quanto mais uso, mais perto do fim de vida) com a contagem
+  de **Offline Uncorrectable** (setores não corrigíveis). O `_std` (variação
   recente) no topo mostra que o que pesa é a **mudança/instabilidade** do valor,
   não só o nível absoluto.
 - **Cuidado ao interpretar:** Power-On Hours (idade/uso) ser a nº1 é coerente,
@@ -219,14 +221,14 @@ valor por dia. O dataset traz **24 atributos** por disco por dia, nomeados
 | `smart_00` | 1 | Raw Read Error Rate | Taxa de erros de leitura dos pratos (em Seagate, valores enormes nem sempre indicam problema) |
 | `smart_01` | 3 | Spin Up Time | Tempo para o motor atingir a rotação operacional |
 | `smart_02` | 4 | Start/Stop Count | Nº de partidas e paradas do disco |
-| `smart_03` | 5 | Reallocated Sector Count | Setores defeituosos remapeados — **um dos mais fortes indicadores de falha** |
+| `smart_03` | 5 | Reallocated Sector Count | Setores defeituosos remapeados para a área reserva |
 | `smart_04` | 7 | Seek Error Rate | Erro no posicionamento das cabeças (valores estranhos em Seagate) |
 | `smart_05` | 9 | Power-On Hours | Horas totais de funcionamento (uso/idade) |
 | `smart_06` | 10 | Spin Retry Count | Tentativas de reatingir a rotação (problemas de motor) |
 | `smart_07` | 12 | Power Cycle Count | Nº de vezes que o disco foi ligado |
 | `smart_08` | 183 | Runtime Bad Block / PHY Events | Eventos de blocos defeituosos em operação (depende do fabricante) |
-| `smart_09` | 184 | End-to-End Error / IOEDC | Erros de integridade entre cache, controlador e mídia — **crítico** |
-| `smart_10` | 187 | Reported Uncorrectable Errors | Erros que nem o ECC corrigiu — **forte indicador de degradação** |
+| `smart_09` | 184 | End-to-End Error / IOEDC | Erros de integridade entre cache, controlador e mídia |
+| `smart_10` | 187 | Reported Uncorrectable Errors | Erros que nem o ECC conseguiu corrigir |
 | `smart_11` | 188 | Command Timeout | Comandos que expiraram por demora |
 | `smart_12` | 189 | High Fly Writes | Escritas com a cabeça acima da altura ideal (vibração/desgaste) |
 | `smart_13` | 190 | Airflow Temperature | Temperatura interna / fluxo de ar |
@@ -234,18 +236,17 @@ valor por dia. O dataset traz **24 atributos** por disco por dia, nomeados
 | `smart_15` | 192 | Power-Off Retract Count | Recolhimento de emergência da cabeça após desligamento inesperado |
 | `smart_16` | 193 | Load/Unload Cycle Count | Nº de estacionamentos da cabeça |
 | `smart_17` | 194 | Temperature Celsius | Temperatura do disco |
-| `smart_18` | 197 | Current Pending Sector Count | Setores suspeitos aguardando remapeamento — **um dos melhores preditores** |
-| `smart_19` | 198 | Offline Uncorrectable | Setores não corrigíveis em testes offline — **forte preditor** |
+| `smart_18` | 197 | Current Pending Sector Count | Setores suspeitos aguardando remapeamento |
+| `smart_19` | 198 | Offline Uncorrectable | Setores não corrigíveis durante testes offline |
 | `smart_20` | 199 | UDMA CRC Error Count | Erros de comunicação disco↔controlador (cabo SATA, ruído) |
 | `smart_21` | 240 | Head Flying Hours | Horas com a cabeça ativa sobre os pratos |
 | `smart_22` | 241 | Total LBAs Written | Total de blocos escritos (volume de escrita) |
 | `smart_23` | 242 | Total LBAs Read | Total de blocos lidos (volume de leitura) |
 
-> **Atenção (vale verificar / pode virar pergunta):** vários desses atributos são
-> **mecânicos, típicos de HDD** (Spin Up Time, Seek Error Rate, Spin Retry, High
-> Fly Writes, Head Flying Hours, Load/Unload, G-Sense) — SSDs não têm pratos nem
-> cabeças. Isso sugere que o dataset usa o **esquema SMART de HDD** (ou é de
-> HDDs). Confirmem a fonte do dataset e estejam preparados para essa pergunta.
+> **Nota:** o dataset é de **HDDs** (modelo **Seagate ST4000DM000**, 4 TB). Por
+> isso vários atributos são **mecânicos** (Spin Up Time, Seek Error Rate, Spin
+> Retry, High Fly Writes, Head Flying Hours, Load/Unload, G-Sense) — indicadores
+> que só fazem sentido em disco com pratos e cabeças.
 
 ## O que significam os sufixos (agregações da janela)
 Cada atributo SMART vira **5 features**, resumindo os últimos `WINDOW = 90` dias
@@ -260,8 +261,8 @@ daquele disco até o dia atual:
 
 Exemplo de leitura: `smart_05_std` alto = o **Power-On Hours** (ID 9, `smart_05`)
 **variou bastante** na janela de 90 dias — ou seja, captura o ritmo de uso/idade
-recente do disco. É a feature nº1 do RF (uso/idade é forte preditor neste
-dataset, onde todo disco acaba falhando).
+recente do disco. É a feature nº1 do RF (uso/idade pesa muito neste dataset,
+onde todo disco acaba falhando).
 
 ---
 
